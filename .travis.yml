@@ -1,0 +1,15 @@
+language: java
+before_install:
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg
+  -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg
+  -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in gradle.properties.enc -out
+  gradle.properties -d
+sudo: false
+install: /bin/true
+script: gradle uploadArchives
+
+env:
+  global:
+    secure: qhGqw190PVbI70Vr4UVgnKfDS8YJTrVtkMMXCc/11kypTbu5dugheD1zNAYQQAzo8Fm4SrwAhvOhGF85M+FARrxBdJsuSrWPsTS94q65m/T/WCCmDsWyD8frwtmSBWgRP+lbTlunzXEDHB71Bu2+oi70yaGn2fnfr2mkyaUn4uUzsFa2ShleBCI48nV3nekbdriPQ8rhaou5lgxN3tjyK97hQXTCcs+T++15yLR3S08Duo5F4Tmpn6TpEyQaq9VuknKGVVJ/nuSKK3GQIiNzcKxCiuMAn698M/ALAGDdIrcd8lIELRyUQpIpqRiuBYFw3ZHWFXiid76GBXownOkdAfOwPrJLd4W9bNrTPFPWoSBv4+CtqhqDWzvm1DqR280Iso1pErlSyQmRfkD7ZPpOH5DnkXg6tKTQyNUECDQxCbnrV43YOJS3HUC3J7pUIv+7NGeAX3tLMNxEiYoswGeEurcfyshKKsCaZF+sQDsGjNX76EUxmL2o2pZTEYTXdBZ1Xg7FmzqatvAPn3GE+cU9rjV9HhNPY8W10LQLx0sHw+8PstQ/3t/rwV68YqCsTOXmIJCcdENMqZbcyiZ0NpNMElGUuWpJEcIQCzmTHdt/Fq48CHKOlVmJyTcKTuHsAJT09cSLxyG+WYK7pJk4VyvLKeht3CjMWm+31BkpjWPujfU=
