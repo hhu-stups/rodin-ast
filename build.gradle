@@ -1,0 +1,73 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility = '1.7'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+ant.properties["org.eventb.core.ast.home"] = "."
+ant.importBuild 'tom/tom-task.xml'
+
+task tom() << {
+  ant.tom(config: 'tools/tom-2.8/Tom.xml',
+          classpath: ant.references['tom.classpath'],
+          srcdir: 'src',
+          destdir: 'src',
+          options: "-I ./tom",
+          pretty: 'true',
+          optimize: 'true') {
+              include(name: '**/*.t')
+          }
+
+  def plugin_code = """
+  package org.eventb.internal.core.ast;
+
+  public class ASTPlugin {
+
+  public static String PLUGIN_ID = "who.cares";
+  public static void log(Object who, Object cares) {}
+
+  }"""
+
+  File f = file('src/org/eventb/internal/core/ast/ASTPlugin.java')
+  f.delete()
+  f << plugin_code
+
+}
+
+task patch() << {
+  def patch_content = """
+  --- rodin-ast/src/org/eventb/internal/core/parser/SubParsers.java	2015-08-06 12:29:24.000000000 +0200
+  +++ rodin-b-sharp-rodincore/org.eventb.core.ast/src/org/eventb/internal/core/parser/SubParsers.java	2015-08-06 12:42:32.000000000 +0200
+  @@ -492,7 +492,7 @@ public class SubParsers {
+
+   	};
+
+  -	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
+  +	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
+
+   		@Override
+   		protected int getKind(AbstractGrammar grammar) {
+
+  """
+  File p = file("SubParsers.patch")
+  p << patch_content
+  ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror:'true' )
+}
+
+
+
+compileJava {
+  dependsOn << 'tom'
+}
+
+clean{
+    delete "src/org/eventb/internal/core/typecheck/TypeUnifier.java"
+}
