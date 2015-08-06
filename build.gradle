@@ -43,25 +43,25 @@ task tom() << {
 }
 
 task patch() << {
-  def patch_content = """
-  --- rodin-ast/src/org/eventb/internal/core/parser/SubParsers.java	2015-08-06 12:29:24.000000000 +0200
-  +++ rodin-b-sharp-rodincore/org.eventb.core.ast/src/org/eventb/internal/core/parser/SubParsers.java	2015-08-06 12:42:32.000000000 +0200
+  def patch_content = """diff --git a/src/org/eventb/internal/core/parser/SubParsers.java b/src/org/eventb/internal/core/parser/SubParsers.java
+  index e71bf08..0977da1 100644
+  --- a/src/org/eventb/internal/core/parser/SubParsers.java
+  +++ b/src/org/eventb/internal/core/parser/SubParsers.java
   @@ -492,7 +492,7 @@ public class SubParsers {
 
    	};
 
-  -	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
-  +	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
+  -	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
+  +	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
 
    		@Override
    		protected int getKind(AbstractGrammar grammar) {
-
-  """
+"""
   File p = file("SubParsers.patch")
+  p.delete();
   p << patch_content
   ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror:'true' )
 }
-
 
 
 compileJava {
