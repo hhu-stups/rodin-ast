@@ -492,7 +492,7 @@ public class SubParsers {
 
 	};
 
-	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
+	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
 
 		@Override
 		protected int getKind(AbstractGrammar grammar) {
