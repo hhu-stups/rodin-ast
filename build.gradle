@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 sourceCompatibility = '1.7'
 
-project.version = '3.2.0'
+project.version = '3.2.1-SNAPSHOT'
 project.group = 'de.hhu.stups'
 project.archivesBaseName = 'rodin-eventb-ast'
 
