@@ -8,6 +8,9 @@ No original file is changed, but we added:
 * README.md
 * build.gradle
 * .travis.yml
+* gradle
+* gradlew
+* gradlew.bat
 * gradle.properties.enc
 * secring.gpg.enc
 * pubring.gpg.enc
