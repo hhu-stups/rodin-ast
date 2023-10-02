@@ -71,6 +71,10 @@ compileJava {
   dependsOn << 'tom'
 }
 
+javadoc {
+    failOnError = false
+}
+
 clean{
     delete "src/org/eventb/internal/core/typecheck/TypeUnifier.java"
 }
