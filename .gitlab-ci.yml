@@ -11,9 +11,9 @@ publish:
   stage: deploy
   image: eclipse-temurin:8
   script:
-    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -md md5 -in secring.gpg.enc -out secring.gpg
-    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -md md5 -in pubring.gpg.enc -out pubring.gpg
-    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -md md5 -in gradle.properties.enc -out gradle.properties
+    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in gradle.properties.enc -out gradle.properties
+    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in pubring.gpg.enc -out pubring.gpg
+    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in secring.gpg.enc -out secring.gpg
     - ./gradlew ${GRADLE_OPTIONS} uploadArchives
   only:
     - master@general/stups/rodin_eventb_ast

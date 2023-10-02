@@ -95,6 +95,8 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
+ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
+
 signing {
     sign configurations.archives
 }
