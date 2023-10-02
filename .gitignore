@@ -1,4 +1,6 @@
 /bin/
 /src/org/eventb/internal/core/typecheck/TypeUnifier.java
+.gradle
 SubParsers.patch
+build
 local.*
