@@ -1,6 +1,8 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'maven'
+plugins {
+	id "eclipse"
+	id "java"
+	id "maven"
+}
 
 sourceCompatibility = '1.7'
 
