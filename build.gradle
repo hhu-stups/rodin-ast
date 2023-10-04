@@ -15,7 +15,7 @@ sourceSets {
     }
 }
 
-ant.properties["org.eventb.core.ast.home"] = "."
+ant.properties["org.eventb.core.ast.home"] = projectDir.toString()
 ant.importBuild 'tom/tom-task.xml'
 
 task tom() << {
@@ -23,7 +23,7 @@ task tom() << {
           classpath: ant.references['tom.classpath'],
           srcdir: 'src',
           destdir: 'src',
-          options: "-I ./tom",
+          options: "-I ${projectDir}/tom",
           pretty: 'true',
           optimize: 'true') {
               include(name: '**/*.t')
