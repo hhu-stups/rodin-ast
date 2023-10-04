@@ -8,146 +8,146 @@ project.version = '3.2.1-SNAPSHOT'
 project.group = 'de.hhu.stups'
 
 sourceSets {
-    main {
-        java {
-            srcDir 'src'
-        }
-    }
+	main {
+		java {
+			srcDir 'src'
+		}
+	}
 }
 
 ant.properties["org.eventb.core.ast.home"] = projectDir.toString()
 ant.importBuild 'tom/tom-task.xml'
 
 task tom() << {
-  ant.tom(config: 'tools/tom-2.8/Tom.xml',
-          classpath: ant.references['tom.classpath'],
-          srcdir: 'src',
-          destdir: 'src',
-          options: "-I ${projectDir}/tom",
-          pretty: 'true',
-          optimize: 'true') {
-              include(name: '**/*.t')
-          }
+	ant.tom(
+		config: 'tools/tom-2.8/Tom.xml',
+		classpath: ant.references['tom.classpath'],
+		srcdir: 'src',
+		destdir: 'src',
+		options: "-I ${projectDir}/tom",
+		pretty: 'true',
+		optimize: 'true',
+	) {
+		include(name: '**/*.t')
+	}
 
-  def plugin_code = """
-  package org.eventb.internal.core.ast;
+	def plugin_code = """\
+package org.eventb.internal.core.ast;
 
-  public class ASTPlugin {
+public class ASTPlugin {
+	public static String PLUGIN_ID = "who.cares";
+	public static void log(Object who, Object cares) {}
+}
+"""
 
-  public static String PLUGIN_ID = "who.cares";
-  public static void log(Object who, Object cares) {}
-
-  }"""
-
-  File f = file('src/org/eventb/internal/core/ast/ASTPlugin.java')
-  f.delete()
-  f << plugin_code
-
+	File f = file('src/org/eventb/internal/core/ast/ASTPlugin.java')
+	f.delete()
+	f << plugin_code
 }
 
 task patch() << {
-  def patch_content = """diff --git a/src/org/eventb/internal/core/parser/SubParsers.java b/src/org/eventb/internal/core/parser/SubParsers.java
-  index e71bf08..0977da1 100644
-  --- a/src/org/eventb/internal/core/parser/SubParsers.java
-  +++ b/src/org/eventb/internal/core/parser/SubParsers.java
-  @@ -492,7 +492,7 @@ public class SubParsers {
+	def patch_content = """\
+diff --git a/src/org/eventb/internal/core/parser/SubParsers.java b/src/org/eventb/internal/core/parser/SubParsers.java
+index e71bf08..0977da1 100644
+--- a/src/org/eventb/internal/core/parser/SubParsers.java
++++ b/src/org/eventb/internal/core/parser/SubParsers.java
+@@ -492,7 +492,7 @@ public class SubParsers {
 
-   	};
+ 	};
 
-  -	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
-  +	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
+-	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
++	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
 
-   		@Override
-   		protected int getKind(AbstractGrammar grammar) {
+ 		@Override
+ 		protected int getKind(AbstractGrammar grammar) {
 """
-  File p = file("SubParsers.patch")
-  p.delete();
-  p << patch_content
-  ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror:'true' )
+
+	File p = file("SubParsers.patch")
+	p.delete()
+	p << patch_content
+	ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror: 'true')
 }
 
 
 compileJava {
-  dependsOn << 'tom'
+	dependsOn << 'tom'
 }
 
 javadoc {
-    failOnError = false
+	failOnError = false
 }
 
-clean{
-    delete "src/org/eventb/internal/core/typecheck/TypeUnifier.java"
+clean {
+	delete "src/org/eventb/internal/core/typecheck/TypeUnifier.java"
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+	println "Configured upload task"
 
-println "Configured upload task"
+	apply plugin: 'signing'
 
-apply plugin: 'signing'
+	task javadocJar(type: Jar) {
+		classifier = 'javadoc'
+		from javadoc
+	}
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
+	task sourcesJar(type: Jar) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+	artifacts {
+		archives javadocJar, sourcesJar
+	}
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
+	ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
 
-ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
+	signing {
+		sign configurations.archives
+	}
 
-signing {
-    sign configurations.archives
-}
+	uploadArchives {
+		repositories {
+			mavenDeployer {
+				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+				repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+					authentication(userName: ossrhUsername, password: ossrhPassword)
+				}
 
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
+				snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+					authentication(userName: ossrhUsername, password: ossrhPassword)
+				}
 
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
+				pom.project {
+					name 'Rodin EventB AST'
+					packaging 'jar'
+					// optionally artifactId can be defined here
+					description 'The AST library extracted from the Rodin Platform.'
+					url 'https://github.com/hhu-stups/rodin-ast'
 
-      pom.project {
-        name 'Rodin EventB AST'
-        packaging 'jar'
-        // optionally artifactId can be defined here
-        description 'The AST library extracted from the Rodin Platform.'
-        url 'https://github.com/hhu-stups/rodin-ast'
+					licenses {
+						license {
+							name 'Eclipse Public License, V 1.0'
+							url 'https://www.eclipse.org/legal/epl-v10.html'
+						}
+					}
 
-        licenses {
-          license {
-            name 'Eclipse Public License, V 1.0'
-            url 'https://www.eclipse.org/legal/epl-v10.html'
-          }
-        }
+					scm {
+						connection 'scm:git:git://github.com/hhu-stups/rodin-ast.git'
+						developerConnection 'scm:git:git@github.com:hhu-stups/rodin-ast.git'
+						url 'https://github.com/hhu-stups/rodin-ast'
+					}
 
-        scm {
-          connection 'scm:git:git://github.com/hhu-stups/rodin-ast.git'
-          developerConnection 'scm:git:git@github.com:hhu-stups/rodin-ast.git'
-          url 'https://github.com/hhu-stups/rodin-ast'
-        }
-
-
-        developers {
-          developer {
-            id 'bendisposto'
-            name 'Jens Bendisposto'
-            email 'jens@bendisposto.de'
-          }
-        }
-      }
-    }
-  }
-}
+					developers {
+						developer {
+							id 'bendisposto'
+							name 'Jens Bendisposto'
+							email 'jens@bendisposto.de'
+						}
+					}
+				}
+			}
+		}
+	}
 }
