@@ -49,31 +49,6 @@ public class ASTPlugin {
 	}
 }
 
-task patch() {
-	doLast {
-		def patch_content = """\
-diff --git a/src/org/eventb/internal/core/parser/SubParsers.java b/src/org/eventb/internal/core/parser/SubParsers.java
-index e71bf08..0977da1 100644
---- a/src/org/eventb/internal/core/parser/SubParsers.java
-+++ b/src/org/eventb/internal/core/parser/SubParsers.java
-@@ -492,7 +492,7 @@ public class SubParsers {
-
- 	};
-
--	public static class BoundIdentDeclSubParser extends ValuedNudParser<BoundIdentDecl> {
-+	public static class BoundIdentDeclSubParser extends ValuedNudParser<org.eventb.core.ast.BoundIdentDecl> {
-
- 		@Override
- 		protected int getKind(AbstractGrammar grammar) {
-"""
-
-		File p = file("SubParsers.patch")
-		p.delete()
-		p << patch_content
-		ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror: 'true')
-	}
-}
-
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_7
 

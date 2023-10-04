@@ -14,6 +14,3 @@ No original file is changed, but we added:
 * pubring.gpg.enc
 * secring.gpg.enc
 * settings.gradle
-
-Note to future Jens:
-After updating the sources the ```gradle patch``` task must be run. This modifies the sources. **Do not run the task multiple times!**
