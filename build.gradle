@@ -18,20 +18,21 @@ sourceSets {
 ant.properties["org.eventb.core.ast.home"] = projectDir.toString()
 ant.importBuild 'tom/tom-task.xml'
 
-task tom() << {
-	ant.tom(
-		config: 'tools/tom-2.8/Tom.xml',
-		classpath: ant.references['tom.classpath'],
-		srcdir: 'src',
-		destdir: 'src',
-		options: "-I ${projectDir}/tom",
-		pretty: 'true',
-		optimize: 'true',
-	) {
-		include(name: '**/*.t')
-	}
+task tom() {
+	doLast {
+		ant.tom(
+			config: 'tools/tom-2.8/Tom.xml',
+			classpath: ant.references['tom.classpath'],
+			srcdir: 'src',
+			destdir: 'src',
+			options: "-I ${projectDir}/tom",
+			pretty: 'true',
+			optimize: 'true',
+		) {
+			include(name: '**/*.t')
+		}
 
-	def plugin_code = """\
+		def plugin_code = """\
 package org.eventb.internal.core.ast;
 
 public class ASTPlugin {
@@ -40,13 +41,15 @@ public class ASTPlugin {
 }
 """
 
-	File f = file('src/org/eventb/internal/core/ast/ASTPlugin.java')
-	f.delete()
-	f << plugin_code
+		File f = file('src/org/eventb/internal/core/ast/ASTPlugin.java')
+		f.delete()
+		f << plugin_code
+	}
 }
 
-task patch() << {
-	def patch_content = """\
+task patch() {
+	doLast {
+		def patch_content = """\
 diff --git a/src/org/eventb/internal/core/parser/SubParsers.java b/src/org/eventb/internal/core/parser/SubParsers.java
 index e71bf08..0977da1 100644
 --- a/src/org/eventb/internal/core/parser/SubParsers.java
@@ -62,10 +65,11 @@ index e71bf08..0977da1 100644
  		protected int getKind(AbstractGrammar grammar) {
 """
 
-	File p = file("SubParsers.patch")
-	p.delete()
-	p << patch_content
-	ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror: 'true')
+		File p = file("SubParsers.patch")
+		p.delete()
+		p << patch_content
+		ant.patch(patchfile: 'SubParsers.patch', originalfile: 'src/org/eventb/internal/core/parser/SubParsers.java', failonerror: 'true')
+	}
 }
 
 
