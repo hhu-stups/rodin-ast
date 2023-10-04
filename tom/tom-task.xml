@@ -5,10 +5,10 @@
 	 * are made available under the terms of the Eclipse Public License v1.0
 	 * which accompanies this distribution, and is available at
 	 * http://www.eclipse.org/legal/epl-v10.html
-	 *
+	 * 
 	 * Contributors:
 	 *     ETH Zurich - initial API and implementation
-	 *     Systerel - migration to tom-2.8
+	 *     Systerel - migration to tom-2.8 
 	-->
 
 	<description>
@@ -17,7 +17,7 @@
 		of the "org.eventb.core.ast" source plugin, then import this file in
 		an Ant build script.  This will define a new task called "tom".  To use
 		that task, write something like:
-
+		
 		&lt;tom	config="${tom.home}/Tom.xml"
 				srcdir="${src}"
 				destdir="${src}"

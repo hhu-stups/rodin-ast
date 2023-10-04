@@ -97,9 +97,9 @@ import org.eventb.internal.core.parser.MainParsers.PatternParser;
  * result type of the (sub)parsing, i.e the type of the parsed object. C is the
  * type of the children of the parsed object.
  * </p>
- *
+ * 
  * @author Nicolas Beauger
- *
+ * 
  */
 public class SubParsers {
 
@@ -138,7 +138,7 @@ public class SubParsers {
 
 	}
 
-
+	
 	private static abstract class PrefixNudParser<R> extends AbstractNudParser<R> {
 
 		// True if this operator is syntactically closed, e.g. surrounded by
@@ -149,25 +149,25 @@ public class SubParsers {
 			super(kind, tag);
 			this.closed = closed;
 		}
-
+		
 		@Override
 		public final SubParseResult<R> nud(ParserContext pc) throws SyntaxError {
 			pc.accept(kind);
 			final R right = parseRight(pc);
 			return new SubParseResult<R>(right, kind, closed);
 		}
-
+		
 		/**
 		 * Current token is the one that immediately follows the one on which
 		 * nud() applies.
-		 *
+		 * 
 		 * @param pc
 		 *            the parser context
 		 * @return the value to be returned by nud()
 		 * @throws SyntaxError
 		 */
 		protected abstract R parseRight(ParserContext pc) throws SyntaxError;
-
+		
 		@Override
 		public void toString(IToStringMediator mediator, R toPrint) {
 			mediator.appendImage(kind);
@@ -177,7 +177,7 @@ public class SubParsers {
 	private static abstract class ParenNudParser<R, C> extends PrefixNudParser<R> {
 
 		private final INudParser<C> childParser;
-
+		
 		protected ParenNudParser(int kind, int tag, INudParser<C> childParser) {
 			super(kind, tag, true);
 			this.childParser = childParser;
@@ -198,9 +198,9 @@ public class SubParsers {
 			checkValue(pc, child);
 			return makeValue(pc.factory, child, pc.getSourceLocation());
 		}
-
+		
 		protected abstract C getChild(R parent);
-
+		
 		@Override
 		public void toString(IToStringMediator mediator, R toPrint) {
 			super.toString(mediator, toPrint);
@@ -215,27 +215,27 @@ public class SubParsers {
 		protected void printChild(IToStringMediator mediator, C child) {
 			childParser.toString(mediator, child);
 		}
-
+		
 		protected void checkValue(ParserContext pc, C child) throws SyntaxError {
 			// to be overridden by subclasses when required
 		}
 
 		protected abstract R makeValue(FormulaFactory factory, C child, SourceLocation loc) throws SyntaxError;
 	}
-
+	
 	private static abstract class ParenNudFormulaChildParser<R, C extends Formula<?>> extends ParenNudParser<R, C> {
 
 		protected ParenNudFormulaChildParser(int kind, int tag,
 				INudParser<C> childParser) {
 			super(kind, tag, childParser);
 		}
-
+		
 		@Override
 		protected void printChild(IToStringMediator mediator, C child) {
 			mediator.subPrintNoPar(child, true, NO_DECL);
 		}
 	}
-
+	
 	private static abstract class ValuedNudParser<R> implements INudParser<R> {
 
 		public ValuedNudParser() {
@@ -253,14 +253,14 @@ public class SubParsers {
 		}
 
 		protected abstract int getKind(AbstractGrammar grammar);
-
+		
 		/**
 		 * Makes the value to be returned by nud().
 		 * <p>
 		 * Current token is the one that immediately follows the given token
 		 * value.
 		 * </p>
-		 *
+		 * 
 		 * @param pc
 		 *            a parser context
 		 * @param tokenVal
@@ -268,7 +268,7 @@ public class SubParsers {
 		 * @param loc
 		 *            the location of the token on which nud() applies
 		 * @return the value to be returned by nud().
-		 * @throws SyntaxError
+		 * @throws SyntaxError 
 		 */
 		protected abstract R makeValue(ParserContext pc, String tokenVal, SourceLocation loc) throws SyntaxError;
 
@@ -280,19 +280,19 @@ public class SubParsers {
 			extends AbstractLedParser<R> {
 
 		protected final INudParser<C> childParser;
-
+		
 		protected BinaryLedParser(int kind, int tag, INudParser<C> rightParser) {
 			super(kind, tag);
 			this.childParser = rightParser;
 		}
-
+		
 		protected C parseRight(ParserContext pc) throws SyntaxError {
 			return pc.subParse(childParser, true);
 		}
 
 		/**
 		 * Returns the left child (or first child) of the given formula node.
-		 *
+		 * 
 		 * @param parent
 		 *            a formula node
 		 * @return a left node
@@ -302,13 +302,13 @@ public class SubParsers {
 		/**
 		 * Return the right child of the given node, or <code>null</code> if
 		 * none.
-		 *
+		 * 
 		 * @param parent
 		 *            a formula node
 		 * @return a right node or <code>null</code>
 		 */
 		protected abstract C getRight(R parent);
-
+		
 		@Override
 		public final SubParseResult<R> led(Formula<?> left, ParserContext pc) throws SyntaxError {
 			pc.accept(kind);
@@ -339,48 +339,48 @@ public class SubParsers {
 		protected void subPrintRight(IToStringMediator mediator, C right) {
 			mediator.subPrint(right, true);
 		}
-
+		
 		protected abstract C asLeftType(Formula<?> left, ParserContext pc) throws SyntaxError;
-
+		
 		protected void checkValue(ParserContext pc, C left, C right)
 				throws SyntaxError {
 			// to be overridden by subclasses when required
 		}
-
+	
 		protected abstract R makeValue(FormulaFactory factory, C left,
 				C right, SourceLocation loc) throws SyntaxError;
 	}
-
+	
 	private static abstract class BinaryLedExprParser<R> extends BinaryLedParser<R, Expression> {
 
 		protected BinaryLedExprParser(int kind, int tag) {
 			super(kind, tag, EXPR_PARSER);
 		}
-
+		
 		@Override
 		protected final Expression asLeftType(Formula<?> left, ParserContext pc) throws SyntaxError {
 			return asExpression(left, pc);
 		}
-
+		
 	}
-
+	
 	private static abstract class BinaryLedPredParser<R> extends BinaryLedParser<R, Predicate> {
 
 		protected BinaryLedPredParser(int kind, int tag) {
 			super(kind, tag, PRED_PARSER);
 		}
-
+		
 		@Override
 		protected Predicate asLeftType(Formula<?> left, ParserContext pc) throws SyntaxError {
 			return asPredicate(left, pc);
 		}
 
 	}
-
+	
 	private static abstract class AssociativeLedParser<R, C extends Formula<?>> extends AbstractLedParser<R> {
 
 		private final INudParser<C> childParser;
-
+		
 		protected AssociativeLedParser(int kind, int tag, INudParser<C> childParser) {
 			super(kind, tag);
 			this.childParser = childParser;
@@ -389,10 +389,10 @@ public class SubParsers {
 		@Override
 		public SubParseResult<R> led(Formula<?> left, ParserContext pc) throws SyntaxError {
 			final C typedLeft = asChildType(left, pc);
-
+			
 			final List<C> children = new ArrayList<C>();
 			children.add(typedLeft);
-
+			
 			do {
 				pc.accept(kind);
 				final C next = pc.subParse(childParser, true);
@@ -408,13 +408,13 @@ public class SubParsers {
 					pc.getSourceLocation());
 			return new SubParseResult<R>(result, kind);
 		}
-
+		
 		protected void checkResult(ParserContext pc, List<C> children) throws SyntaxError {
 			// to be overridden by children when required
 		}
 
 		protected abstract C[] getChildren(R parent);
-
+		
 		@Override
 		public void toString(IToStringMediator mediator, R toPrint) {
 			final C[] children = getChildren(toPrint);
@@ -424,9 +424,9 @@ public class SubParsers {
 				mediator.subPrint(children[i], true);
 			}
 		}
-
+		
 		protected abstract C asChildType(Formula<?> left, ParserContext pc) throws SyntaxError;
-
+		
 		protected abstract R makeResult(FormulaFactory factory,
 				List<C> children, SourceLocation loc) throws SyntaxError;
 
@@ -440,7 +440,7 @@ public class SubParsers {
 		protected int getKind(AbstractGrammar grammar) {
 			return grammar.getKind(IDENT);
 		}
-
+		
 		@Override
 		protected Identifier makeValue(ParserContext pc, String tokenVal,
 				SourceLocation loc) {
@@ -469,7 +469,7 @@ public class SubParsers {
 		}
 
 	};
-
+	
 	static final INudParser<FreeIdentifier> FREE_IDENT_SUBPARSER = new INudParser<FreeIdentifier>() {
 
 		@Override
@@ -498,7 +498,7 @@ public class SubParsers {
 		protected int getKind(AbstractGrammar grammar) {
 			return grammar.getKind(IDENT);
 		}
-
+		
 		@Override
 		protected BoundIdentDecl makeValue(ParserContext pc, String tokenVal,
 				SourceLocation loc) throws SyntaxError {
@@ -529,7 +529,7 @@ public class SubParsers {
 				OftypeParser.appendOftype(mediator, toPrint.getType(), false);
 			}
 		}
-
+		
 		public static void printIdent(IToStringMediator mediator,
 				final BoundIdentDecl[] decls, final String[] resolvedIdents,
 				int index) {
@@ -538,9 +538,9 @@ public class SubParsers {
 				OftypeParser.appendOftype(mediator, decls[index].getType(), false);
 			}
 		}
-
+		
 	}
-
+	
 	public static final BoundIdentDeclSubParser BOUND_IDENT_DECL_SUBPARSER = new BoundIdentDeclSubParser();
 
 	public static class IntLitSubParser extends ValuedNudParser<IntegerLiteral> {
@@ -549,7 +549,7 @@ public class SubParsers {
 		protected int getKind(AbstractGrammar grammar) {
 			return grammar.getKind(INT_LIT);
 		}
-
+		
 		@Override
 		protected IntegerLiteral makeValue(ParserContext pc, String tokenVal,
 				SourceLocation loc) throws SyntaxError {
@@ -564,15 +564,15 @@ public class SubParsers {
 						ProblemSeverities.Error));
 			}
 		}
-
+		
 		@Override
 		public void toString(IToStringMediator mediator, IntegerLiteral toPrint) {
-			final BigInteger literal = toPrint.getValue();
-
+			final BigInteger literal = toPrint.getValue();			
+			
 			toStringInternal(mediator, literal);
-
+			
 		}
-
+		
 		// Change the minus sign if any, so that it conforms to the mathematical
 		// language: \u2212 (minus sign) instead of \u002d (hyphen-minus).
 		private void toStringInternal(IToStringMediator mediator, BigInteger literal) {
@@ -584,18 +584,18 @@ public class SubParsers {
 				mediator.append(image);
 			}
 		}
-
+		
 	}
-
+	
 	public static final IntLitSubParser INTLIT_SUBPARSER = new IntLitSubParser();
-
+	
 	public static final INudParser<Predicate> PRED_VAR_SUBPARSER = new ValuedNudParser<Predicate>() {
 
 		@Override
 		protected int getKind(AbstractGrammar grammar) {
 			return grammar.getKind(PRED_VAR);
 		}
-
+		
 		@Override
 		protected Predicate makeValue(ParserContext pc,
 				String tokenVal, SourceLocation loc) throws SyntaxError {
@@ -622,7 +622,7 @@ public class SubParsers {
 		private static final String POW_ALPHA_BETA_ALPHA = "\u2119(alpha \u00d7 beta \u00d7 alpha)";
 		private static final String POW_ALPHA_BETA_BETA = "\u2119(alpha \u00d7 beta \u00d7 beta)";
 		private static final String EXTENSION_TYPE = "[see operator definition]";
-
+		
 		@Override
 		public SubParseResult<Expression> led(Formula<?> left, ParserContext pc) throws SyntaxError {
 			if (!isTypedGeneric(left)) {
@@ -630,7 +630,7 @@ public class SubParsers {
 			}
 			final int oftype = pc.getGrammar().getKind(OFTYPE);
 			pc.accept(oftype);
-
+			
 			Type type = pc.subParse(TYPE_PARSER, true);
 			final SourceLocation typeLoc = pc.getSourceLocation();
 			if (!checkValidTypedGeneric(left, type, typeLoc, pc.result)) {
@@ -647,7 +647,7 @@ public class SubParsers {
 				result = pc.factory.makeAtomicExpression(left.getTag(),
 						sourceLoc, type);
 			}
-
+			
 			return new SubParseResult<Expression>(result, oftype);
 		}
 
@@ -669,7 +669,7 @@ public class SubParsers {
 			return new ASTProblem(pc.makeSourceLocation(pc.t),
 					ProblemKind.UnexpectedOftype, ProblemSeverities.Error);
 		}
-
+		
 		// FIXME duplicate checks with AtomicExpression => factorize
 		private static boolean checkValidTypedGeneric(Formula<?> formula, Type type,
 				SourceLocation typeLoc, ParseResult result) throws SyntaxError {
@@ -716,7 +716,7 @@ public class SubParsers {
 					ProblemSeverities.Error,
 					expected);
 		}
-
+		
 		private static boolean isValidPrjType(Type type, boolean left) {
 			final Type source = type.getSource();
 			final Type target = type.getTarget();
@@ -745,13 +745,13 @@ public class SubParsers {
 			mediator.appendImage(oftype, withSpaces);
 			/*
 			 * If we were rigorous, the next line should be
-			 *
+			 * 
 			 * TYPE_PARSER.toString(mediator, type);
-			 *
+			 * 
 			 * However, using method toString() of Type is more efficient (it
 			 * avoids translating the type back to an expression just to unparse
 			 * it).
-			 *
+			 * 
 			 * Moreover, method toString() of Type does not produce exactly the
 			 * same output as TYPE_PARSER.toString() (there is no space around
 			 * Cartesian product). So changing back to a call to
@@ -763,19 +763,19 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	/**
 	 * Parses expressions outside bound identifier declarations. Always returns
 	 * an expression with the same tag as left.
 	 */
 	public static final ILedParser<Expression> OFTYPE_PARSER = new OftypeParser();
-
+	
 	public static class AtomicExpressionParser extends PrefixNudParser<AtomicExpression> {
-
+	
 		public AtomicExpressionParser(int kind, int tag) {
 			super(kind, tag, true);
 		}
-
+	
 		@Override
 		protected AtomicExpression parseRight(ParserContext pc)
 				throws SyntaxError {
@@ -785,11 +785,11 @@ public class SubParsers {
 	}
 
 	public static class ExtendedAtomicExpressionParser extends PrefixNudParser<ExtendedExpression> {
-
+		
 		public ExtendedAtomicExpressionParser(int kind, int tag) {
 			super(kind, tag, true);
 		}
-
+	
 		@Override
 		protected ExtendedExpression parseRight(ParserContext pc)
 				throws SyntaxError {
@@ -806,13 +806,13 @@ public class SubParsers {
 		public BinaryExpressionInfix(int kind, int tag) {
 			super(kind, tag);
 		}
-
+		
 		@Override
 		protected BinaryExpression makeValue(FormulaFactory factory, Expression left,
 				Expression right, SourceLocation loc) throws SyntaxError {
 			return factory.makeBinaryExpression(tag, left, right, loc);
 		}
-
+		
 		@Override
 		protected Expression getLeft(BinaryExpression parent) {
 			return parent.getLeft();
@@ -824,7 +824,7 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	public static class ExtendedBinaryExpressionInfix extends BinaryLedExprParser<ExtendedExpression> {
 
 		public ExtendedBinaryExpressionInfix(int kind, int tag) {
@@ -837,14 +837,14 @@ public class SubParsers {
 				throws SyntaxError {
 			EXTENDED_EXPR.check(pc, tag, asList(left, right));
 		}
-
+		
 		@Override
 		protected ExtendedExpression makeValue(FormulaFactory factory,
 				Expression left, Expression right, SourceLocation loc)
 				throws SyntaxError {
 			return EXTENDED_EXPR.make(factory, tag, asList(left, right), loc);
 		}
-
+		
 		@Override
 		protected Expression getLeft(ExtendedExpression parent) {
 			return parent.getChildExpressions()[0];
@@ -879,7 +879,7 @@ public class SubParsers {
 		protected Expression[] getChildren(AssociativeExpression parent) {
 			return parent.getChildren();
 		}
-
+		
 	}
 
 	public static class ExtendedAssociativeExpressionInfix extends AssociativeLedParser<ExtendedExpression, Expression> {
@@ -887,12 +887,12 @@ public class SubParsers {
 		public ExtendedAssociativeExpressionInfix(int kind, int tag) {
 			super(kind, tag, EXPR_PARSER);
 		}
-
+		
 		@Override
 		protected void checkResult(ParserContext pc, List<Expression> children) throws SyntaxError {
 			EXTENDED_EXPR.check(pc, tag, children);
 		}
-
+		
 		@Override
 		protected ExtendedExpression makeResult(FormulaFactory factory,
 				List<Expression> children, SourceLocation loc) throws SyntaxError {
@@ -908,9 +908,9 @@ public class SubParsers {
 		protected Expression[] getChildren(ExtendedExpression parent) {
 			return parent.getChildExpressions();
 		}
-
+		
 	}
-
+	
 	public static class AssociativePredicateInfix extends AssociativeLedParser<AssociativePredicate, Predicate> {
 
 		public AssociativePredicateInfix(int kind, int tag) {
@@ -946,7 +946,7 @@ public class SubParsers {
 				Expression left, Expression right, SourceLocation loc) throws SyntaxError {
 			return factory.makeRelationalPredicate(tag, left, right, loc);
 		}
-
+		
 		@Override
 		protected Expression getLeft(RelationalPredicate parent) {
 			return parent.getLeft();
@@ -965,7 +965,7 @@ public class SubParsers {
 		}
 
 		protected abstract int getCloseKind(AbstractGrammar grammar);
-
+		
 		@Override
 		protected Expression parseRight(ParserContext pc) throws SyntaxError {
 			// FIXME parsing this way prevents priority and compatibility checks
@@ -975,7 +975,7 @@ public class SubParsers {
 			pc.accept(closeKind);
 			return right;
 		}
-
+		
 		@Override
 		protected BinaryExpression makeValue(FormulaFactory factory, Expression left,
 				Expression right, SourceLocation loc) throws SyntaxError {
@@ -991,13 +991,13 @@ public class SubParsers {
 		protected Expression getLeft(BinaryExpression parent) {
 			return parent.getLeft();
 		}
-
+		
 		@Override
 		protected void subPrintRight(IToStringMediator mediator,
 				Expression right) {
 			mediator.subPrintNoPar(right, false, NO_DECL);
 		}
-
+		
 		@Override
 		public void toString(IToStringMediator mediator,
 				BinaryExpression toPrint) {
@@ -1053,7 +1053,7 @@ public class SubParsers {
 				Predicate right, SourceLocation loc) throws SyntaxError {
 			return factory.makeBinaryPredicate(tag, left, right, loc);
 		}
-
+		
 		@Override
 		protected Predicate getLeft(BinaryPredicate parent) {
 			return parent.getLeft();
@@ -1111,25 +1111,25 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	public static class ConverseParser extends BinaryLedExprParser<UnaryExpression> {
 
 		public ConverseParser(int kind) {
 			super(kind, CONVERSE);
 		}
-
+		
 		@Override
 		protected UnaryExpression makeValue(FormulaFactory factory, Expression left,
 				Expression right, SourceLocation loc) throws SyntaxError {
 			return factory.makeUnaryExpression(tag, left, loc);
 		}
-
+		
 		@Override
 		protected Expression parseRight(ParserContext pc) throws SyntaxError {
 			// nothing to parse at right
 			return null;
 		}
-
+		
 		@Override
 		protected Expression getLeft(UnaryExpression parent) {
 			return parent.getChild();
@@ -1140,7 +1140,7 @@ public class SubParsers {
 			return null;
 		}
 	}
-
+	
 	public static class KBoolParser extends ParenNudFormulaChildParser<BoolExpression, Predicate> {
 
 		public KBoolParser(int kind) {
@@ -1161,7 +1161,7 @@ public class SubParsers {
 	}
 
 	public static final class SetExtParser extends PrefixNudParser<SetExtension> {
-
+		
 		public SetExtParser(int kind) {
 			super(kind, SETEXT, true);
 		}
@@ -1189,11 +1189,11 @@ public class SubParsers {
 			mediator.append(RBRACE);
 		}
 	}
-
+	
 	public static interface IQuantifiedParser<R> extends INudParser<R> {
 		void setLocalNames(String[] localNames);
 	}
-
+	
 	static abstract class QuantifiedParser<R> extends PrefixNudParser<R> implements IQuantifiedParser<R> {
 		protected QuantifiedParser(int kind, int tag, boolean closed) {
 			super(kind, tag, closed);
@@ -1210,14 +1210,14 @@ public class SubParsers {
 			assert localNames != null;
 			return localNames;
 		}
-
+		
 		protected void printBoundIdentDecls(IToStringMediator mediator, BoundIdentDecl[] boundDecls) {
 			BoundIdentDeclListParser.toString(mediator, boundDecls, getLocalNames());
 		}
 	}
-
+	
 	public static class ExplicitQuantExpr extends QuantifiedParser<QuantifiedExpression> {
-
+		
 		public ExplicitQuantExpr(int kind, int tag) {
 			this(kind, tag, false);
 		}
@@ -1240,7 +1240,7 @@ public class SubParsers {
 			return pc.factory.makeQuantifiedExpression(tag, boundIdents, pred,
 					expr, pc.getSourceLocation(), Form.Explicit);
 		}
-
+	
 		protected void acceptClose(ParserContext pc) throws SyntaxError {
 			// do nothing by default
 		}
@@ -1257,9 +1257,9 @@ public class SubParsers {
 			mediator.subPrintNoPar(toPrint.getExpression(), false, getLocalNames());
 		}
 	}
-
+	
 	public static class CSetExplicit extends ExplicitQuantExpr {
-
+		
 		public CSetExplicit(int kind) {
 			super(kind, CSET, true);
 		}
@@ -1269,16 +1269,16 @@ public class SubParsers {
 			final int rbrace = pc.getGrammar().getKind(RBRACE);
 			pc.accept(rbrace);
 		}
-
+		
 		@Override
 		public void toString(IToStringMediator mediator, QuantifiedExpression toPrint) {
 			super.toString(mediator, toPrint);
 			mediator.append(RBRACE);
 		}
 	}
-
+	
 	public static class ImplicitQuantExpr extends QuantifiedParser<QuantifiedExpression> {
-
+		
 		public ImplicitQuantExpr(int kind, int tag) {
 			this(kind, tag, false);
 		}
@@ -1307,7 +1307,7 @@ public class SubParsers {
 			return pc.factory.makeQuantifiedExpression(tag, boundIdents, pred,
 					boundExpr, pc.getSourceLocation(), Form.Implicit);
 		}
-
+		
 		protected void acceptClose(ParserContext pc) throws SyntaxError {
 			// do nothing by default
 		}
@@ -1320,9 +1320,9 @@ public class SubParsers {
 			mediator.append(MID);
 			mediator.subPrintNoPar(toPrint.getPredicate(), false, getLocalNames());
 		}
-
+		
 	}
-
+	
 	public static class CSetImplicit extends ImplicitQuantExpr {
 
 		public CSetImplicit(int kind) {
@@ -1334,16 +1334,16 @@ public class SubParsers {
 			final int rbrace = pc.getGrammar().getKind(RBRACE);
 			pc.accept(rbrace);
 		}
-
+		
 		@Override
 		public void toString(IToStringMediator mediator, QuantifiedExpression toPrint) {
 			super.toString(mediator, toPrint);
 			mediator.append(RBRACE);
 		}
 	}
-
+	
 	public static class CSetLambda extends QuantifiedParser<QuantifiedExpression> {
-
+		
 		public CSetLambda(int kind) {
 			super(kind, CSET, false);
 		}
@@ -1359,7 +1359,7 @@ public class SubParsers {
 			final int mid = pc.getGrammar().getKind(MID);
 			pc.accept(mid);
 			final Expression expr = pc.subParseNoParentNoCheck(EXPR_PARSER, boundDecls);
-
+			
 			final Expression pair = pc.factory.makeBinaryExpression(MAPSTO,
 					pattern.getPattern(), expr, null);
 			return pc.factory.makeQuantifiedExpression(tag, boundDecls, pred,
@@ -1421,7 +1421,7 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	public static class UnminusParser extends AbstractNudParser<Expression> {
 
 		public UnminusParser(int kind) {
@@ -1458,11 +1458,11 @@ public class SubParsers {
 			}
 		}
 	}
-
+	
 	private static class AbstractExtendedParen<R extends IExtendedFormula> extends ParenNudParser<R, List<Formula<?>>> {
-
+		
 		private final ExtensionCheckMaker<R> extCheckMaker;
-
+		
 		public AbstractExtendedParen(int kind, int tag, ExtensionCheckMaker<R> extCheckMaker) {
 			super(kind, tag, FORMULA_LIST_PARSER);
 			this.extCheckMaker = extCheckMaker;
@@ -1472,7 +1472,7 @@ public class SubParsers {
 		protected void checkValue(ParserContext pc, List<Formula<?>> children) throws SyntaxError {
 			extCheckMaker.check(pc, tag, children);
 		}
-
+		
 		@Override
 		protected R makeValue(FormulaFactory factory,
 				List<Formula<?>> children, SourceLocation loc) throws SyntaxError {
@@ -1488,7 +1488,7 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	public static class ExtendedExprParen extends AbstractExtendedParen<ExtendedExpression> {
 
 		public ExtendedExprParen(int kind, int tag) {
@@ -1496,7 +1496,7 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	public static class ExtendedPredParen extends AbstractExtendedParen<ExtendedPredicate> {
 
 		public ExtendedPredParen(int kind, int tag) {
@@ -1504,13 +1504,13 @@ public class SubParsers {
 		}
 
 	}
-
+	
 	private static abstract class ExtensionCheckMaker<T extends IExtendedFormula> {
 
 		public ExtensionCheckMaker() {
 			// avoid synthetic accessor methods
 		}
-
+		
 		public final void check(ParserContext pc, int tag,
 				List<? extends Formula<?>> children) throws SyntaxError {
 			final IFormulaExtension extension = pc.factory.getExtension(tag);
@@ -1551,7 +1551,7 @@ public class SubParsers {
 				List<Predicate> childPreds, SourceLocation loc);
 
 	}
-
+	
 	static final ExtensionCheckMaker<ExtendedExpression> EXTENDED_EXPR = new ExtensionCheckMaker<ExtendedExpression>() {
 
 		@Override
@@ -1577,6 +1577,6 @@ public class SubParsers {
 		}
 
 	};
-
-
+	
+	
 }
