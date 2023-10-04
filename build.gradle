@@ -1,13 +1,15 @@
 plugins {
 	id "eclipse"
-	id "java"
-	id "maven"
+	id "java-library"
+	id "maven-publish"
+	id "signing"
 }
 
 sourceCompatibility = '1.7'
 
 project.version = '3.2.1-SNAPSHOT'
 project.group = 'de.hhu.stups'
+final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 sourceSets {
 	main {
@@ -74,6 +76,10 @@ index e71bf08..0977da1 100644
 	}
 }
 
+java {
+	withSourcesJar()
+	withJavadocJar()
+}
 
 compileJava {
 	dependsOn << 'tom'
@@ -87,73 +93,57 @@ clean {
 	delete "src/org/eventb/internal/core/typecheck/TypeUnifier.java"
 }
 
-if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
-	println "Configured upload task"
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
 
-	apply plugin: 'signing'
+			pom {
+				name = "Rodin EventB AST"
+				description = "The AST library extracted from the Rodin Platform."
+				url = "https://github.com/hhu-stups/rodin-ast"
 
-	task javadocJar(type: Jar) {
-		classifier = 'javadoc'
-		from javadoc
-	}
-
-	task sourcesJar(type: Jar) {
-		classifier = 'sources'
-		from sourceSets.main.allSource
-	}
-
-	artifacts {
-		archives javadocJar, sourcesJar
-	}
-
-	ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
-
-	signing {
-		sign configurations.archives
-	}
-
-	uploadArchives {
-		repositories {
-			mavenDeployer {
-				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-				repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-					authentication(userName: ossrhUsername, password: ossrhPassword)
+				licenses {
+					license {
+						name = "Eclipse Public License, V 1.0"
+						url = "https://www.eclipse.org/legal/epl-v10.html"
+					}
 				}
 
-				snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-					authentication(userName: ossrhUsername, password: ossrhPassword)
+				scm {
+					connection = "scm:git:git://github.com/hhu-stups/rodin-ast.git"
+					developerConnection = "scm:git:git@github.com:hhu-stups/rodin-ast.git"
+					url = "https://github.com/hhu-stups/rodin-ast"
 				}
 
-				pom.project {
-					name 'Rodin EventB AST'
-					packaging 'jar'
-					// optionally artifactId can be defined here
-					description 'The AST library extracted from the Rodin Platform.'
-					url 'https://github.com/hhu-stups/rodin-ast'
-
-					licenses {
-						license {
-							name 'Eclipse Public License, V 1.0'
-							url 'https://www.eclipse.org/legal/epl-v10.html'
-						}
-					}
-
-					scm {
-						connection 'scm:git:git://github.com/hhu-stups/rodin-ast.git'
-						developerConnection 'scm:git:git@github.com:hhu-stups/rodin-ast.git'
-						url 'https://github.com/hhu-stups/rodin-ast'
-					}
-
-					developers {
-						developer {
-							id 'bendisposto'
-							name 'Jens Bendisposto'
-							email 'jens@bendisposto.de'
-						}
+				developers {
+					developer {
+						id = "bendisposto"
+						name = "Jens Bendisposto"
+						email = "jens@bendisposto.de"
 					}
 				}
 			}
 		}
 	}
+
+	repositories {
+		maven {
+			final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+			final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+			url isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
+			if (project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")) {
+				credentials {
+					username project.ossrhUsername
+					password project.ossrhPassword
+				}
+			}
+		}
+	}
+}
+
+ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
+
+signing {
+	sign publishing.publications.mavenJava
 }
