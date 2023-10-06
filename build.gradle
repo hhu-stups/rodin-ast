@@ -33,19 +33,6 @@ task tom() {
 		) {
 			include(name: '**/*.t')
 		}
-
-		def plugin_code = """\
-package org.eventb.internal.core.ast;
-
-public class ASTPlugin {
-	public static String PLUGIN_ID = "who.cares";
-	public static void log(Object who, Object cares) {}
-}
-"""
-
-		File f = file('src/org/eventb/internal/core/ast/ASTPlugin.java')
-		f.delete()
-		f << plugin_code
 	}
 }
 
