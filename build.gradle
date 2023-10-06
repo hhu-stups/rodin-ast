@@ -6,7 +6,7 @@ plugins {
 }
 
 project.group = 'de.hhu.stups'
-project.version = "3.8.0-SNAPSHOT"
+project.version = "3.8.0"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 sourceSets {
