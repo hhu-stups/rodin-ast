@@ -79,7 +79,7 @@ public class Datatype implements IDatatype {
 
 	// Cache of the extensions provided by this datatype
 	private final Set<IFormulaExtension> extensions;
-	
+
 	private final Object origin;
 
 	private Datatype(DatatypeBuilder dtBuilder) {
@@ -87,7 +87,7 @@ public class Datatype implements IDatatype {
 		origin = dtBuilder.getOrigin();
 		typeCons = new TypeConstructorExtension(this, dtBuilder);
 		constructors = new LinkedHashMap<String, ConstructorExtension>();
-		destructors = new HashMap<String, DestructorExtension>(); 
+		destructors = new HashMap<String, DestructorExtension>();
 		final List<ConstructorBuilder> dtConstrs = dtBuilder.getConstructors();
 		for (final ConstructorBuilder dtCons : dtConstrs) {
 			final ConstructorExtension constructor = dtCons.makeExtension(this);
@@ -161,17 +161,24 @@ public class Datatype implements IDatatype {
 		return unmodifiableSet(extensions);
 	}
 
+	/**
+	 * The hash code is computed from the datatype's type constructors,
+	 * constructor extensions, and the origin.
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result	+ typeCons.hashCode();
+		result = prime * result + typeCons.hashCode();
 		result = prime * result + constructors.hashCode();
-		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
+		result = prime * result + (origin == null ? 0 : origin.hashCode());
 		return result;
 	}
 
-
+	/**
+	 * The datatypes are the same if they have the same name and "similar" type
+	 * constructors, constructor extensions, and origins.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -183,15 +190,23 @@ public class Datatype implements IDatatype {
 		final Datatype other = (Datatype) obj;
 		return this.typeCons.isSimilarTo(other.typeCons)
 				&& areSimilarConstructors(this.constructors.values(),
-						other.constructors.values())
-				&& areEqualOrigins(this.origin, other.origin);
+						other.constructors.values()) &&
+						areSimilarOrigins(this.getOrigin(), other.getOrigin());
 	}
-	
-	private static boolean areEqualOrigins(Object origin1, Object origin2) {
-		if (origin1 == null) {
-			return origin2 == null;
-		}
-		return origin1.equals(origin2);
+
+	/**
+	 * Utility method to compare the datatype origin.
+	 * 
+	 * @param mine
+	 *            mine origin
+	 * @param other
+	 *            the other's origin
+	 * @return <code>true</code> if the two origin are equal.
+	 */
+	private boolean areSimilarOrigins(Object mine, Object other) {
+		if (mine == null)
+			return (other == null);
+		return mine.equals(other);
 	}
 
 	private static boolean areSimilarConstructors(
