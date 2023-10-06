@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2016 Systerel and others.
+ * Copyright (c) 2010, 2022 Systerel and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eventb.core.ast.extension.IExtensionKind;
 import org.eventb.core.ast.extension.IOperatorProperties.FormulaType;
 import org.eventb.core.ast.extension.IOperatorProperties.Notation;
 import org.eventb.core.ast.extension.IPredicateExtension;
+import org.eventb.core.ast.extension.IPredicateExtension2;
 import org.eventb.internal.core.ast.FindingAccumulator;
 import org.eventb.internal.core.ast.ITypeCheckingRewriter;
 import org.eventb.internal.core.ast.IdentListMerger;
@@ -154,9 +155,9 @@ public class ExtendedPredicate extends Predicate implements IExtendedFormula {
 	/**
 	 * Must never be called directly: use the factory method instead.
 	 * 
-	 * @see FormulaFactory#makeExtendedPredicate(IPredicateExtension,
+	 * @see FormulaFactory#makeExtendedPredicate(IPredicateExtension2,
 	 *      Expression[], Predicate[], SourceLocation)
-	 * @see FormulaFactory#makeExtendedPredicate(IPredicateExtension,
+	 * @see FormulaFactory#makeExtendedPredicate(IPredicateExtension2,
 	 *      java.util.Collection, java.util.Collection, SourceLocation)
 	 */
 	protected ExtendedPredicate(int tag, Expression[] expressions,
@@ -200,7 +201,25 @@ public class ExtendedPredicate extends Predicate implements IExtendedFormula {
 				return;
 			}
 		}
-		typeChecked = true;
+
+		final FormulaFactory ff = getFactory();
+		BoundIdentDecl[] boundDecls;
+		if (boundIdents.length > 0) {
+			boundDecls = new BoundIdentDecl[boundIdents.length];
+			for (int i = 0; i < boundIdents.length; i++) {
+				boundDecls[i] = new BoundIdentDecl("b" + i, null, boundIdents[i].getType(), ff);
+			}
+		} else {
+			boundDecls = NO_BOUND_IDENT_DECL;
+		}
+
+		if (extension instanceof IPredicateExtension2) {
+			typeChecked = ((IPredicateExtension2) extension).verifyType(childExpressions, childPredicates);
+		} else {
+			TypeCheckResult tcRes = new TypeCheckResult(ff.makeTypeEnvironment().makeSnapshot());
+			typeCheck(tcRes, boundDecls);
+			typeChecked = !tcRes.hasProblem();
+		}
 	}
 
 	@Override
