@@ -6,7 +6,7 @@ plugins {
 }
 
 project.group = 'de.hhu.stups'
-project.version = "3.4.0"
+project.version = "3.5.0-SNAPSHOT"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 sourceSets {
@@ -37,7 +37,7 @@ task tom() {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_7
+	sourceCompatibility = JavaVersion.VERSION_1_8
 
 	withSourcesJar()
 	withJavadocJar()
