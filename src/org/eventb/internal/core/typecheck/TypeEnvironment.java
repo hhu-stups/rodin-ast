@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 ETH Zurich and others.
+ * Copyright (c) 2005, 2023 ETH Zurich and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,6 +185,11 @@ public abstract class TypeEnvironment implements ITypeEnvironment{
 	}
 
 	@Override
+	public IExtensionTranslation makeExtensionTranslation(FormulaFactory targetFactory) {
+		return new ExtensionTranslation(this.makeSnapshot(), targetFactory);
+	}
+
+	@Override
 	public IIterator getIterator(){
 		return new InternalIterator(map.entrySet().iterator());
 	}
@@ -197,6 +202,12 @@ public abstract class TypeEnvironment implements ITypeEnvironment{
 	@Override
 	public Type getType(String name) {
 		return map.get(name);
+	}
+
+	@Override
+	public FreeIdentifier[] getFreeIdentifiers() {
+		return map.entrySet().stream().map(e -> ff.makeFreeIdentifier(e.getKey(), null, e.getValue()))
+				.toArray(FreeIdentifier[]::new);
 	}
 
 	@Override
