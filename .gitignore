@@ -1,5 +1,14 @@
 /bin/
 /src/org/eventb/internal/core/typecheck/TypeUnifier.java
+
+# Gradle
 .gradle
 build
+
+# Eclipse
+.classpath
+.project
+.settings
+
+# Misc
 local.*
